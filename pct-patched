@@ -18,14 +18,30 @@ if [[ "$1" == "create" ]]; then
     if [[ $PCT_EXIT_CODE -eq 0 ]] && [[ -n "$CTID" ]] && [[ -f "/etc/pve/lxc/${CTID}.conf" ]]; then
         # Check if fix is already applied
         if ! grep -q "lxc.apparmor.profile: unconfined" "/etc/pve/lxc/${CTID}.conf" 2>/dev/null; then
+            # Detect container OS type
+            # The mount.entry line is only needed for Ubuntu containers
+            # See: https://github.com/opencontainers/runc/issues/4968
+            OSTYPE=$("$REAL_PCT" config "$CTID" 2>/dev/null | grep "^ostype:" | awk '{print $2}' || echo "")
+
             echo "[pct-patched] Applying AppArmor workaround for CVE-2025-52881 to container ${CTID}..."
+            echo "[pct-patched] Detected OS: ${OSTYPE:-unknown}"
+
             cat <<EOF >> /etc/pve/lxc/${CTID}.conf
 # AppArmor workaround for CVE-2025-52881 (Docker/runc compatibility)
 # Added automatically by pve-script-wrapper
+# See: https://github.com/opencontainers/runc/issues/4968
 lxc.apparmor.profile: unconfined
+EOF
+
+            # Add mount entry only for Ubuntu (Debian typically doesn't need this)
+            if [[ "$OSTYPE" == "ubuntu" ]]; then
+                cat <<EOF >> /etc/pve/lxc/${CTID}.conf
 lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
 EOF
-            echo "[pct-patched] AppArmor configuration applied to container ${CTID}"
+                echo "[pct-patched] Applied: lxc.apparmor.profile + mount.entry (Ubuntu)"
+            else
+                echo "[pct-patched] Applied: lxc.apparmor.profile (mount.entry not needed for ${OSTYPE:-this OS})"
+            fi
         fi
     fi
 

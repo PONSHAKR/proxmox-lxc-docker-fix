@@ -33,14 +33,21 @@ This repository provides three tools that automatically apply the AppArmor worka
 
 ### How It Works
 
-The scripts automatically add these configuration lines to LXC containers:
+The scripts automatically detect your container's OS and apply the appropriate AppArmor workaround:
 
+**For all containers:**
 ```conf
 lxc.apparmor.profile: unconfined
+```
+
+**For Ubuntu containers only:**
+```conf
 lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
 ```
 
-This disables AppArmor for the container and masks the AppArmor module, allowing runc to function correctly.
+The first line disables AppArmor confinement (required for all distributions). The second line masks the AppArmor module detection and is only needed for Ubuntu containers - Debian containers typically work without it ([runc#4968](https://github.com/opencontainers/runc/issues/4968)).
+
+**OS Auto-Detection:** The scripts automatically detect whether your container is Ubuntu or Debian and apply only the necessary configuration lines.
 
 ## 📦 Installation
 
@@ -126,13 +133,17 @@ pct stop 105
 # Edit the config file
 nano /etc/pve/lxc/105.conf
 
-# Add these lines at the end:
+# Add this line at the end (required for all containers):
 lxc.apparmor.profile: unconfined
+
+# For Ubuntu containers, also add this line:
 lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
 
 # Start the container
 pct start 105
 ```
+
+**Note:** Debian containers typically only need the first line. Ubuntu containers need both lines. See [runc#4968](https://github.com/opencontainers/runc/issues/4968) for technical details.
 
 ## 🔧 How It Works Technically
 
@@ -145,12 +156,15 @@ pct start 105
 ### pct-patched
 - Intercepts `pct create` commands
 - Calls the real `/usr/sbin/pct` to create the container
-- Immediately after creation, injects AppArmor configuration into `/etc/pve/lxc/$CTID.conf`
+- Detects container OS type (Ubuntu vs Debian)
+- Immediately after creation, injects appropriate AppArmor configuration into `/etc/pve/lxc/$CTID.conf`
 - Passes through all other `pct` commands unchanged
 
 ### pve-docker-fix
 - Standalone tool for fixing existing containers
+- Detects container OS type automatically
 - Checks if fix is already applied (idempotent)
+- Applies only necessary configuration lines based on OS
 - Handles container stop/start with user confirmation
 - Safe to run multiple times
 
@@ -186,8 +200,14 @@ pct start 105
 ### Confirmed Affected
 - Proxmox VE 8.x with recent updates
 - Debian 12 (Bookworm) LXC containers
+- Ubuntu LXC containers (all recent versions)
 - runc versions 1.2.7+ and 1.3.2+
 - containerd version 1.7.28-2+
+
+### OS-Specific Notes
+- **Debian containers**: Typically only need `lxc.apparmor.profile: unconfined`
+- **Ubuntu containers**: Need both config lines (profile + mount entry)
+- Scripts auto-detect OS and apply appropriate fix
 
 ### Community Scripts Known to Be Affected
 - docker.sh
@@ -224,6 +244,13 @@ chmod +x /usr/local/bin/pve-script-wrapper.sh /usr/local/bin/pct-patched
 ```bash
 # Verify the fix was applied
 grep -i apparmor /etc/pve/lxc/105.conf
+
+# Check detected OS type
+pct config 105 | grep ostype
+
+# For Ubuntu containers, ensure both lines are present:
+# - lxc.apparmor.profile: unconfined
+# - lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled...
 
 # If not present, apply manually
 pve-docker-fix 105

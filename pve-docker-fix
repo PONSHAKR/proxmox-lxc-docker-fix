@@ -84,10 +84,21 @@ if grep -q "lxc.apparmor.profile: unconfined" "/etc/pve/lxc/${CTID}.conf"; then
     exit 0
 fi
 
+# Detect container OS type
+# The mount.entry line is only needed for Ubuntu containers
+# See: https://github.com/opencontainers/runc/issues/4968
+OSTYPE=$(pct config "$CTID" 2>/dev/null | grep "^ostype:" | awk '{print $2}' || echo "")
+NEEDS_MOUNT_ENTRY=false
+
+if [[ "$OSTYPE" == "ubuntu" ]]; then
+    NEEDS_MOUNT_ENTRY=true
+fi
+
 echo "=========================================="
 echo "Applying AppArmor Fix to Container $CTID"
 echo "=========================================="
 echo ""
+echo "Detected OS: ${OSTYPE:-unknown}"
 
 # Check if container is running
 CONTAINER_STATUS=$(pct status "$CTID" 2>/dev/null | awk '{print $2}' || echo "unknown")
@@ -106,15 +117,29 @@ if [[ "$CONTAINER_STATUS" == "running" ]] && [[ "$NO_RESTART" == false ]]; then
 fi
 
 echo "Applying AppArmor workaround for CVE-2025-52881..."
+echo ""
 
 # Append the fix to the config file
 cat <<EOF >> /etc/pve/lxc/${CTID}.conf
 # AppArmor workaround for CVE-2025-52881 (Docker/runc compatibility)
 # Added by pve-docker-fix on $(date +%Y-%m-%d)
+# See: https://github.com/opencontainers/runc/issues/4968
 lxc.apparmor.profile: unconfined
-lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
 EOF
 
+# Add mount entry only for Ubuntu (see runc#4968 - Debian typically doesn't need this)
+if [[ "$NEEDS_MOUNT_ENTRY" == true ]]; then
+    cat <<EOF >> /etc/pve/lxc/${CTID}.conf
+lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
+EOF
+    echo "✓ Applied: lxc.apparmor.profile: unconfined"
+    echo "✓ Applied: lxc.mount.entry (Ubuntu-specific)"
+else
+    echo "✓ Applied: lxc.apparmor.profile: unconfined"
+    echo "  (Skipped mount.entry - not needed for ${OSTYPE:-this OS})"
+fi
+
+echo ""
 echo "Configuration updated successfully."
 
 if [[ "$CONTAINER_STATUS" == "running" ]] && [[ "$NO_RESTART" == false ]]; then
